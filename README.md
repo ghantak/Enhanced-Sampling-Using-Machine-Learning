@@ -10,5 +10,11 @@ This will generate the update_bias.dat file
 
 Train the CVs and bias values using train_gpr_gpu.py using slurm script
 
-sbatch 
+sbatch train_gpr.slurm
+
+This will generate a .pth file as a training output file and 
+
+Now, we need to modify the NAMD configuration file to add the gpr_control.tcl file (check the file System_NPT_MetaD2.conf)
+
+
 
