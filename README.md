@@ -12,9 +12,18 @@ Train the CVs and bias values using train_gpr_gpu.py using slurm script
 
 sbatch train_gpr.slurm
 
-This will generate a .pth file as a training output file and 
+This will generate a .pth file as a training output file and training_loss_curve.png 
+
+Check the convergence of the training_loss_curve.png file. If it is okay, go to the next step.
+If not, increase the iteration steps and check again 
+
+The loss should show a more consistent and gradual decrease over the iteration steps.
 
 Now, we need to modify the NAMD configuration file to add the gpr_control.tcl file (check the file System_NPT_MetaD2.conf)
+
+Run the Metadynamics using the modified configuration file.
+
+Note: Adjust the time steps for applying the GPR bias. 
 
 
 
