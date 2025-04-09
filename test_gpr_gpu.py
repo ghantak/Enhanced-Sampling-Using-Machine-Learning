@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 
 # File paths
 UPDATED_BIAS_FILE = "update_bias.dat"
-MODEL_FILE = "gpr_model_gpu_train.pth"  # Save model in PyTorch format
-LOSS_FILE = "training_loss_data.dat"  # File to save the training loss data
+MODEL_FILE = "gpr_model_gpu_test.pth"  # Save model in PyTorch format
+LOSS_FILE = "testing_loss_data.dat"  # File to save the testing loss data
 
 # Check for GPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -15,7 +15,7 @@ print(f">>> Using device: {device}")
 
 # Step 1: Load Training Data
 if not os.path.exists(UPDATED_BIAS_FILE):
-    print(">>> ERROR: No data available for training.")
+    print(">>> ERROR: No data available for testing.")
     exit()
 
 bias_data = np.loadtxt(UPDATED_BIAS_FILE)
@@ -27,10 +27,10 @@ if bias_data.shape[0] < 10:
 X = torch.tensor(bias_data[:, 1:3], dtype=torch.float32).to(device)  # CV1, CV2
 y = torch.tensor(bias_data[:, -1], dtype=torch.float32).to(device)  # Bias potential
 
-# Step 2: Split the data into training and testing sets (80% train, 20% test)
+# Step 2: Split the data into testing and testing sets (80% train, 20% test)
 train_size = int(0.8 * len(X))
-X_train = X[:train_size]
-y_train = y[:train_size]
+X_test = X[train_size:]
+y_test = y[train_size:]
 
 # Step 3: Define GPR Model using GPyTorch
 class GPModel(gpytorch.models.ExactGP):
@@ -46,7 +46,7 @@ class GPModel(gpytorch.models.ExactGP):
 
 # Step 4: Initialize Model and Likelihood
 likelihood = gpytorch.likelihoods.GaussianLikelihood().to(device)
-model = GPModel(X_train, y_train, likelihood).to(device)
+model = GPModel(X_test, y_test, likelihood).to(device)
 
 # Step 5: Train the Model with Convergence Check
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01)  # Adam optimizer
@@ -64,8 +64,8 @@ loss_history = []
 print(">>> Training GPR model on GPU...")
 for i in range(500):  # Training loop
     optimizer.zero_grad()
-    output = model(X_train)
-    loss = -mll(output, y_train)
+    output = model(X_test)
+    loss = -mll(output, y_test)
     loss.backward()
     optimizer.step()
 
@@ -95,7 +95,7 @@ torch.save({'model_state_dict': model.state_dict(),
 print(f">>> Successfully trained and saved GPU-accelerated GPR model as {MODEL_FILE}")
 
 # Step 7: Save the loss history to a .dat file
-# Save the training loss data to a .dat file
+# Save the testing loss data to a .dat file
 with open(LOSS_FILE, 'w') as f:
     f.write("# Iteration\tLoss\n")
     for i in range(len(loss_history)):
