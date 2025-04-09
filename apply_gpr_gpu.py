@@ -5,12 +5,12 @@ import gpytorch
 
 # File paths
 UPDATED_BIAS_FILE = "update_bias.dat"  # Bias history file (updated)
-MODEL_FILE = "gpr_model_gpu.pth"  # GPU-trained GPR model
+MODEL_FILE = "gpr_model_gpu_train.pth"  # GPU-trained GPR model
 
 # Simulation parameters
 step_size = 1000  # Bias update interval
 update_interval = 50000  # Steps per update cycle
-total_steps = 50000000  # Total simulation steps
+total_steps = 35000000  # Total simulation steps
 
 # Check for GPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -21,9 +21,9 @@ def get_last_step():
     if os.path.exists(UPDATED_BIAS_FILE):
         bias_data = np.loadtxt(UPDATED_BIAS_FILE)
         if bias_data.size == 0:
-            return 5000000  # Default start step if file is empty
+            return 15000000  # Default start step if file is empty
         return int(bias_data[-1, 0])  # Get last recorded step
-    return 5000000  # Start at 5M steps if file doesn't exist
+    return 15000000  # Start at 5M steps if file doesn't exist
 
 last_step = get_last_step()
 start_step = last_step + step_size
